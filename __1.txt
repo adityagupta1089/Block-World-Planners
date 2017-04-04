@@ -1,0 +1,11 @@
+4
+(empty) (clear 2) (ontable 3) (on 2 1) (on 4 3) (on 1 4)
+(clear 1) (hold 2) (ontable 3) (on 4 3) (on 1 4)
+(empty) (clear 1) (ontable 2) (clear 2) (ontable 3) (on 4 3) (on 1 4)
+(hold 1) (ontable 2) (clear 2) (ontable 3) (clear 4) (on 4 3)
+(empty) (ontable 1) (clear 1) (ontable 2) (clear 2) (ontable 3) (clear 4) (on 4 3)
+(ontable 1) (clear 1) (ontable 2) (clear 2) (ontable 3) (clear 3) (hold 4)
+(empty) (ontable 1) (clear 1) (ontable 2) (clear 2) (ontable 3) (clear 3) (ontable 4) (clear 4)
+(ontable 1) (clear 1) (ontable 2) (clear 2) (hold 3) (ontable 4) (clear 4)
+(empty) (ontable 1) (ontable 2) (clear 2) (clear 3) (ontable 4) (clear 4) (on 3 1)
+(ontable 1) (ontable 2) (clear 2) (clear 3) (hold 4) (on 3 1)
