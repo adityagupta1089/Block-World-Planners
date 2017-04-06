@@ -393,7 +393,7 @@ template<typename T, typename U> void find_actions_forward(int total_blocks, sta
 			track_actions(top, actions);
 			return;
 		}
-		if (contains(visited, top->curr_state)) {
+		if (!contains(visited, top->curr_state)) {
 			visited.insert(top->curr_state);
 			for (variable_action& _variable_action : variable_actions) {
 				action _action;
@@ -560,7 +560,7 @@ int heuristic_value(const state& curr_state, int* height_goal, int total_blocks)
 
 bool action_applicable(variable_action& _variable_action, int var1, int var2, int total_blocks, state& _state, action& _action) {
 	for (condition _condition : _variable_action.preconditions) {
-		if (_state.find(_condition.value(var1, var2, total_blocks)) == _state.end()) return false;
+		if (!contains(_state,_condition.value(var1, var2, total_blocks))) return false;
 	}
 	instantiate_action(_variable_action, _action, var1, var2);
 	return true;
@@ -574,7 +574,7 @@ void instantiate_action(variable_action& _variable_action, action& _action, int 
 
 bool is_goal_state(state& _state, state& goal) {
 	for (proposition _proposition : goal) {
-		if (_state.find(_proposition) == _state.end()) return false;
+		if (!contains(_state, _proposition)) return false;
 	}
 	return true;
 }
@@ -644,7 +644,7 @@ state apply_action(variable_action& _variable_action, int var1, int var2, int to
 		else if (effect._predicate < 0) delete_set.insert(_proposition);
 	}
 	for (proposition _proposition : _state) {
-		if (delete_set.find(_proposition) == delete_set.end()) new_state.insert(_proposition);
+		if (!contains(delete_set,_proposition)) new_state.insert(_proposition);
 	}
 	return new_state;
 }
