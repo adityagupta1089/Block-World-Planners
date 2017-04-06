@@ -2,3 +2,5 @@ log.txt
 *.o
 gmon.out
 .settings
+.cproject
+.project
