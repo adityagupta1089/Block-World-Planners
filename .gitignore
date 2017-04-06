@@ -1,0 +1,4 @@
+log.txt
+*.o
+gmon.out
+.settings
