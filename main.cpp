@@ -243,9 +243,7 @@ void write_actions(char*, vector<action>&);
 // action finding functions
 void find_actions_forward_bfs(int, state, state&, vector<action>&);
 void find_actions_forward_astar(int, state, state&, vector<action>&);
-//void find_actions_goal_stack(int, state, state&, vector<action>&);
-void find_actions_goal_stack_recursive(int, state&, state&, vector<action>&);
-void find_actions_goal_stack_recursive(int, state&, proposition, vector<action>&);
+void find_actions_goal_stack(int, state, state&, vector<action>&);
 
 // helper functions
 bool action_applicable(variable_action&, int, int, int, state&, action&);
@@ -340,7 +338,7 @@ void find_actions(problem& _problem, vector<action>& _actions) {
 			_problem.goal_state, _actions);
 	else if (_problem.type == forward_astar_planner) find_actions_forward_astar(_problem.blocks, _problem.initial_state,
 			_problem.goal_state, _actions);
-	else if (_problem.type == goal_stack_planner) find_actions_goal_stack_recursive(_problem.blocks, _problem.initial_state,
+	else if (_problem.type == goal_stack_planner) find_actions_goal_stack(_problem.blocks, _problem.initial_state,
 			_problem.goal_state, _actions);
 }
 
@@ -443,53 +441,74 @@ void find_actions_forward_astar(int total_blocks, state init_state, state& goal_
 	delete[] height_goal;
 }
 
-void find_actions_goal_stack_recursive(int total_blocks, state& curr_state, state& goal_state, vector<action>& actions) {
-	bool solved = false;
-	while (!solved) {
-		for (proposition goal : goal_state) {
-			cout << "Current Goal: ";
-			print_proposition(goal, total_blocks);
-			cout << "\n";
-			find_actions_goal_stack_recursive(total_blocks, curr_state, goal, actions);
-		}
-		solved = true;
-		for (proposition goal : goal_state) {
-			if (!contains(curr_state, goal)) {
-				solved = false;
-				break;
+#define CONJUNCT_GOAL -1
+#define ACTION -2
+
+void print_goal_stack() {
+
+}
+
+void find_actions_goal_stack(int total_blocks, state curr_state, state& goal_state, vector<action>& actions) {
+	stack<proposition> goal_stack;
+	stack<conjunct_goal> conjunct_goal_stack;
+	stack<pair<action, variable_action>> action_stack;
+
+	conjunct_goal _goal(goal_state.begin(), goal_state.end());
+	conjunct_goal_stack.push(_goal);
+	goal_stack.push(CONJUNCT_GOAL);
+	for (proposition _proposition : goal_state) {
+		goal_stack.push(_proposition);
+	}
+	while (!goal_stack.empty()) {
+		proposition top = goal_stack.top();
+		if (top != CONJUNCT_GOAL) goal_stack.pop(); // we check if it is satisfied
+		if (top == CONJUNCT_GOAL) { // conjunct goal
+			bool satisfied = true;
+			conjunct_goal conjunct_top = conjunct_goal_stack.top();
+			for (proposition _proposition : conjunct_top) {
+				if (curr_state.find(_proposition) == curr_state.end()) {
+					satisfied = false;
+					break;
+				}
 			}
+			if (!satisfied) {
+				//skip first
+				for (int i = 1; i < conjunct_top.size(); i++) {
+					goal_stack.push(conjunct_top[i]);
+				}
+				goal_stack.push(conjunct_top[0]);
+			} else {
+				conjunct_goal_stack.pop();
+				goal_stack.pop();
+			}
+		} else if (top == ACTION) { // action
+			pair<action, variable_action> action_top = action_stack.top();
+			action_stack.pop();
+			actions.push_back(action_top.first);
+			curr_state = apply_action(action_top.second, action_top.first.args[0], action_top.first.args[1], total_blocks,
+					curr_state);
+			if (is_goal_state(curr_state, goal_state)) {
+				return;
+			}
+		} else { // predicate/proposition
+			if (curr_state.find(top) != curr_state.end()) continue;
+			variable_action _variable_action;
+			action _action;
+			get_relevant_action(_variable_action, _action, total_blocks, curr_state, top);
+			vector<proposition> preconditions;
+			action_stack.push(make_pair(_action, _variable_action));
+			goal_stack.push(ACTION);
+			goal_stack.push(CONJUNCT_GOAL);
+			for (condition precondition : _variable_action.preconditions) {
+				proposition _proposition = precondition.value(_action.args[0], _action.args[1], total_blocks);
+				preconditions.push_back(_proposition);
+				goal_stack.push(_proposition);
+			}
+			conjunct_goal_stack.push(preconditions);
 		}
 	}
 }
 
-void find_actions_goal_stack_recursive(int total_blocks, state& curr_state, proposition goal, vector<action>& actions) {
-	if (contains(curr_state, goal)) return;
-	int maximum_relevant_propositions = 0;
-	variable_action relevant_variable_action;
-	action _relevant_action;
-	get_relevant_action(relevant_variable_action, _relevant_action, total_blocks, curr_state, goal);
-	cout << "Relevant Action: ";
-	print_action(_relevant_action);
-	cout << "\n";
-	set<proposition> preconditions;
-	cout << "Action's Precondition: ";
-	for (condition precondition : relevant_variable_action.preconditions) {
-		proposition _proposition = precondition.value(_relevant_action.args[0], _relevant_action.args[1], total_blocks);
-		print_proposition(_proposition, total_blocks);
-		preconditions.insert(_proposition);
-	}
-	cout << "\n";
-	find_actions_goal_stack_recursive(total_blocks, curr_state, preconditions, actions);
-	cout << "Applying Action: ";
-	print_action(_relevant_action);
-	cout << "\n";
-	actions.push_back(_relevant_action);
-	curr_state = apply_action(relevant_variable_action, _relevant_action.args[0], _relevant_action.args[1], total_blocks,
-			curr_state);
-	cout << "State became: ";
-	print_state(curr_state, total_blocks);
-	cout << "\n";
-}
 //=============================================
 // IIa. HEURISTIC FUNCTIONS
 //=============================================
@@ -586,9 +605,6 @@ void get_relevant_action(variable_action& relevant_variable_action, action& _rel
 						}
 					}
 					int count = action_records[key].count[_action];
-					cout << "Action: ";
-					print_action(_action);
-					cout << " [" << count << ", " << relevant_propositions << "]\n";
 					if (count < min_count
 							|| (count == min_count && (relevant_propositions > max_relevant_propositions || rand() % 100 == 0))) {
 						min_count = action_records[key].count[_action];
