@@ -4,3 +4,8 @@ gmon.out
 .settings
 .cproject
 .project
+2015csb1003
+doc/*.aux
+doc/*.log
+doc/*.synctex.gz
+_*.txt

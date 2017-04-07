@@ -1,0 +1,41 @@
+\title{Programming Assignment 3}
+\author{
+	Aditya Gupta\\
+	\underline{2015CSB1003}}
+\date{\today}
+\documentclass{article}
+\usepackage{adjustbox}
+\usepackage{amsmath}
+\begin{document}
+\maketitle
+\section{Sudoku Solver using CSP}
+\subsection{Description}
+A Sudoku Solver was implemented using CSP. The base class \verb|SudokuSolver| creates a \verb|Collection| of unassigned variables while parsing the input lines. In case of \verb|BS| the collection is made into \verb|LinkedList| and every time a new \verb|Variable| is taken from the front of the list and then if the solver backtracks, the variable is added back to front of the list. In case of \verb|BSI| it is made into a \verb|HashSet| for constant time removal after selection of a suitable \verb|Variable| from the set compared according to \verb|MRV| heuristic, i.e. the one with the least consistent values (tie broken with comparing degreees.). In case of \verb|BSII| the legal/consistent values are first collected into a \verb|List| and then sorted according to the one which allows most values for all unassigned neighbours (related variables). In case of \verb|BSMAC| domains are also explicitly introduced in form of \verb|Set<Integer>| and all domains are maintained in a \verb|HashMap<Variable, HashSet<Integer>>|, after every \verb|Variable| is assigned some value, arc-consistency is maintained and if some domain gets reduced to $\phi$, the solver backtracks otherwise we now work with reduced domains.
+
+\subsection{Observations}
+After implementing the three heuristics; the time, number of backtracks and memory utilization were observed:
+\\\\\\
+\begin{adjustbox}{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Metrics&\verb|BS|&\verb|BSI|&\verb|BSII|&\verb|BSMAC|\\\hline
+Time (seconds)&40.244&13.097&14.329&21.809\\
+Backtracks&227,502,770&370,626&364,783&159,498\\\hline
+\end{tabular}
+\end{adjustbox}
+\\\\\\
+We can see that each heuristic makes the total backtracks quite less but in case of \verb|BSII| and \verb|BSMAC|, the added cost of calculating heuristic takes more time.
+\section{Sudoku Solver using MiniSAT}
+A Sudoku Solver was implemented which converts the constraints in the Sudoku to the following binary constraints.
+\subsection{Constraints}
+\begin{itemize}
+\item Every cell cannot have two different values at the same time that is $$\forall (i,j) \in \{0,1,\ldots9\}^2$$$$\left[\neg (\text{grid}(i,j)=k\wedge\text{grid}(i,j)=k')\forall k,k'\in\{1,2,\ldots9\}\text{ and }k\ne k'\right ]$$
+\item Every cell must have atleast one value out of 1 to 9 that is $$\forall (i,j)  \in \{0,1,\ldots9\}^2\\\left[ \bigvee_{k=1}^9 \text{grid}(i,j)=k\right ]$$
+\item Two cells in same row or column or box can't have same values $$\forall (i,j) \in \{0,1,\ldots9\}^2\; \forall (i',j')  \in \{0,1,\ldots9\}^2$$$$  \left[(i,j)\ne(i',j')\wedge \left(i=i'\vee j=j'\vee \left(\left\lfloor \frac i3\right\rfloor=\left\lfloor \frac {i'}3\right\rfloor\wedge \left\lfloor \frac j3\right\rfloor=\left\lfloor \frac {j'}3\right\rfloor\right)\right)\right]$$$$\implies\left[\forall k \in \{1,2,\ldots9\}\neg\left(\text{grid}(i,j)=k\wedge\text{grid}(i',j')=k\right)\right]$$
+\end{itemize}
+
+\subsection{Working}
+Now we can encode each constraint in this way:
+$$\text{grid}(i,j)=k\longrightarrow X_{81i+9j+k}$$
+The code encodes these from the input files and then decodes back the $X_i$'s that are true and fills the grid based on these and then gets a solution.
+\end{document}
