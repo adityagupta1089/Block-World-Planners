@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont
 from moviepy.editor import *
+import sys
 
 
 def parse_state(state):
@@ -38,8 +39,10 @@ def parse(prob):
 def draw_frame(prob):
     edge = 70
     gap = 20
-    _w = 2 * n * edge + (n + 1) * gap
-    _h = 2 * n * edge + (n + 1) * gap
+    n_w = 2
+    n_h = 5
+    _w = n_w * edge + (n_w + 1) * gap
+    _h = n_h * edge + (n_h + 1) * gap
     im = Image.new("RGB", (_w, _h), "white")
     draw = ImageDraw.Draw(im)
     draw.line((gap, _h - gap / 2, _w - gap, _h - gap / 2), fill="black")
@@ -70,6 +73,6 @@ def draw_frame(prob):
 
 
 cnt = 0
-for state in parse("__1.txt"):
-    draw_frame(state).save("1/" + str(cnt), "png")
+for state in parse(sys.argv[1]):
+    draw_frame(state).save("out/" + str(cnt)+".png", "png")
     cnt += 1
