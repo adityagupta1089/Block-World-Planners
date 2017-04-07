@@ -4,106 +4,19 @@
 	\underline{2015CSB1003}}
 \date{\today}
 \documentclass{article}
-\usepackage[T1]{fontenc}
-\usepackage[scaled=0.9]{DejaVuSansMono}
 \usepackage{adjustbox}
 \usepackage{amsmath}
-\usepackage{xcolor}
-\usepackage{listings}
-\lstset{language=c++,basicstyle=\ttfamily,frame=single,breakatwhitespace=true,breaklines=true, }
 \begin{document}
 \maketitle
 \section{Planners for Block World}
 \subsection{Introduction}
 The goal of this lab was to implement a planning agent for solving Block World Problem wherein given $N$ blocks and actions to ``pick a block from table'', ``unstack a block from another block'', ``release a holding block'' and ``stack a holding block onto another block'' we were required to reach a goal state configuration from an initial state using three different planners, ``forward search planner'' with BFS and A*; ``goal stack planning''. The initial and final state is composed of propositions such as \verb|(on 1 2)| and \verb|(ontable 3)|. Each action is a transformation of these propositions which has some \verb|preconditions|, which when true allows us to perform that action and the \verb|effects| of that actions are unified with the current state and the negative literals removed. States are represented in PDDL.
 
-\subsection{Implementation Details}
-\subsubsection{Proposition}
-Each predicate was assigned a constant value($f(\text{pre})$ for predicate \verb|pre|) such that $1$ for `\verb|on|' till $5$ for `\verb|empty|', also the negation of these predicates were represented as negative of the corresponding value. Then the further arguments of the predicate were hashed into an integer value using the following function:
-$$F=f(\text{pre}\;a_0\;a_1) = |f(\text{pre})|+a_0N+a_1N^2$$
-\begin{lstlisting}
-#define	predicate_on 1
-#define	predicate_on_table 2
-#define	predicate_clear 3
-#define	predicate_hold 4
-#define	predicate_empty 5
-#define total_predicates 5
-\end{lstlisting}
-We note that we have used absolute value for the predicate's corresponding value, this is because both \verb|(on 1 2)| and \verb|(~on 1 2)| have the same hash value which eases in finding if a state contains some proposition which might be negated in \verb|preconditions| and \verb|effects| of actions. Negative predicates do not occur in any state (which is represented using PDDL). This function resembles the base-$N$ number and thus $N$ must be greater than maximum $f$ value (here, 5) and maximum block number($\text{max}a_i$), thus $N=1+\text{max}(\text{total\_blocks},\text{total\_predicates})$. We can then retrieve back the arguments in this way (\verb|div| is integer division):
-$$|f(\text{pre})|=F \;\text{mod}\;N$$
-$$a_0 = (F\;\text{div}\;N)\;\text{mod}\;N$$
-$$a_1 = F\;\text{div}\;N^2$$
-\begin{lstlisting}
-typedef int proposition;
-
-#define N (max(total_blocks, total_predicates) + 1)
-
-#define type(x) (x % N)
-
-#define var1(x) ((x / N) % N)
-#define var2(x) (x / (N * N))
-\end{lstlisting}
-
-\subsubsection{State}
-Now each state can be represented as a \verb|set| of \verb|proposition|s or equivalently integer hash values of them. For checking if a state is a goal state we can check for each \verb|proposition| from goal state that whether it exitsts in the current state or not and becasue we have used \verb|set| to represent states, thus this process becomes $O(\log n)$ (instead of $O(1)$, C++ uses Red-Black Tree).
-\begin{lstlisting}
-typedef set<proposition> state;
-\end{lstlisting}
-\subsubsection{Variable Action and Action}
-We can represent the action which contains variables in form of \verb|variable_action| which has the following structure:
-\begin{lstlisting}
-enum action_type {
-	action_pick,
-	action_unstack,
-	action_release,
-	action_stack
-};
-
-struct variable_action {
-		action_type type;
-		string name;
-		vector<char> args;
-		vector<condition> preconditions;
-		vector<condition> effects;
-};
-\end{lstlisting}
-The type and name are obvious, the args are actually variables starting from `\verb|a|' that represents the variables required by the \verb|preconditions| and \verb|effects| of the action, both of which cotain predicates in form of \verb|condition|:
-
-\begin{lstlisting}
-typedef int predicate;
-
-struct condition {
-		predicate _predicate;
-		vector<char> args;
-
-		inline proposition value(int var1, int var2, int total_blocks) {
-			int k = N;
-			int v = abs(_predicate);
-			for (char c : args) {
-				v += k * ((c == 'a') ? var1 : var2);
-				k *= N;
-			}
-			return v;
-		}
-};
-\end{lstlisting}
-Here \verb|predicate| is the corresponding value assigned to that predicate symbol above. \verb|args| is similar to as above and \verb|value| function returns the $f$ value we previously discussed.
-
-An action that has been instantiated can be assigned values to the arguments and thus becomes:
-\begin{lstlisting}
-struct action {
-		string name;
-		vector<int> args;
-		bool operator<(const action& that) const {
-			if (name.compare(that.name) >= 0) return false;
-			if (args.size() >= that.args.size()) return false;
-			for (int i = 0; i < args.size(); i++)
-				if (args[i] >= that.args[i]) return false;
-			return true;
-		}
-};
-\end{lstlisting}
-We have also defined \verb|operator<| for comparison such that it can stored in a \verb|set| (C++ uses Red-Black Tree for representation of sets internally.)
-
 \section{Forward Search using BFS}
+In this search the states are maintained in a queue (initially containing only the initial state) and then every time a element is taken from the queue and checked for satisfying the goals. If it does not satisfy the goals then all actions which are applicable on the current state are taken (after instantiation) and applied on the current state all resulting states pushed onto the queue, in this way we only see states which require equal number of actions from the starting state and we get the optimal solution (minimum number of steps).
+
+\subsection*{Observations}
+\begin{itemize}
+\item \verb|1.txt|
+\end{itemize}
 \end{document}
