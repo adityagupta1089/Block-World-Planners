@@ -1,41 +1,109 @@
-\title{Programming Assignment 3}
+\title{Programming Assignment 4}
 \author{
 	Aditya Gupta\\
 	\underline{2015CSB1003}}
 \date{\today}
 \documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=0.9]{DejaVuSansMono}
 \usepackage{adjustbox}
 \usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{listings}
+\lstset{language=c++,basicstyle=\ttfamily,frame=single,breakatwhitespace=true,breaklines=true, }
 \begin{document}
 \maketitle
-\section{Sudoku Solver using CSP}
-\subsection{Description}
-A Sudoku Solver was implemented using CSP. The base class \verb|SudokuSolver| creates a \verb|Collection| of unassigned variables while parsing the input lines. In case of \verb|BS| the collection is made into \verb|LinkedList| and every time a new \verb|Variable| is taken from the front of the list and then if the solver backtracks, the variable is added back to front of the list. In case of \verb|BSI| it is made into a \verb|HashSet| for constant time removal after selection of a suitable \verb|Variable| from the set compared according to \verb|MRV| heuristic, i.e. the one with the least consistent values (tie broken with comparing degreees.). In case of \verb|BSII| the legal/consistent values are first collected into a \verb|List| and then sorted according to the one which allows most values for all unassigned neighbours (related variables). In case of \verb|BSMAC| domains are also explicitly introduced in form of \verb|Set<Integer>| and all domains are maintained in a \verb|HashMap<Variable, HashSet<Integer>>|, after every \verb|Variable| is assigned some value, arc-consistency is maintained and if some domain gets reduced to $\phi$, the solver backtracks otherwise we now work with reduced domains.
+\section{Planners for Block World}
+\subsection{Introduction}
+The goal of this lab was to implement a planning agent for solving Block World Problem wherein given $N$ blocks and actions to ``pick a block from table'', ``unstack a block from another block'', ``release a holding block'' and ``stack a holding block onto another block'' we were required to reach a goal state configuration from an initial state using three different planners, ``forward search planner'' with BFS and A*; ``goal stack planning''. The initial and final state is composed of propositions such as \verb|(on 1 2)| and \verb|(ontable 3)|. Each action is a transformation of these propositions which has some \verb|preconditions|, which when true allows us to perform that action and the \verb|effects| of that actions are unified with the current state and the negative literals removed. States are represented in PDDL.
 
-\subsection{Observations}
-After implementing the three heuristics; the time, number of backtracks and memory utilization were observed:
-\\\\\\
-\begin{adjustbox}{center}
-\begin{tabular}{|c|c|c|c|c|}
-\hline
-Metrics&\verb|BS|&\verb|BSI|&\verb|BSII|&\verb|BSMAC|\\\hline
-Time (seconds)&40.244&13.097&14.329&21.809\\
-Backtracks&227,502,770&370,626&364,783&159,498\\\hline
-\end{tabular}
-\end{adjustbox}
-\\\\\\
-We can see that each heuristic makes the total backtracks quite less but in case of \verb|BSII| and \verb|BSMAC|, the added cost of calculating heuristic takes more time.
-\section{Sudoku Solver using MiniSAT}
-A Sudoku Solver was implemented which converts the constraints in the Sudoku to the following binary constraints.
-\subsection{Constraints}
-\begin{itemize}
-\item Every cell cannot have two different values at the same time that is $$\forall (i,j) \in \{0,1,\ldots9\}^2$$$$\left[\neg (\text{grid}(i,j)=k\wedge\text{grid}(i,j)=k')\forall k,k'\in\{1,2,\ldots9\}\text{ and }k\ne k'\right ]$$
-\item Every cell must have atleast one value out of 1 to 9 that is $$\forall (i,j)  \in \{0,1,\ldots9\}^2\\\left[ \bigvee_{k=1}^9 \text{grid}(i,j)=k\right ]$$
-\item Two cells in same row or column or box can't have same values $$\forall (i,j) \in \{0,1,\ldots9\}^2\; \forall (i',j')  \in \{0,1,\ldots9\}^2$$$$  \left[(i,j)\ne(i',j')\wedge \left(i=i'\vee j=j'\vee \left(\left\lfloor \frac i3\right\rfloor=\left\lfloor \frac {i'}3\right\rfloor\wedge \left\lfloor \frac j3\right\rfloor=\left\lfloor \frac {j'}3\right\rfloor\right)\right)\right]$$$$\implies\left[\forall k \in \{1,2,\ldots9\}\neg\left(\text{grid}(i,j)=k\wedge\text{grid}(i',j')=k\right)\right]$$
-\end{itemize}
+\subsection{Implementation Details}
+\subsubsection{Proposition}
+Each predicate was assigned a constant value($f(\text{pre})$ for predicate \verb|pre|) such that $1$ for `\verb|on|' till $5$ for `\verb|empty|', also the negation of these predicates were represented as negative of the corresponding value. Then the further arguments of the predicate were hashed into an integer value using the following function:
+$$F=f(\text{pre}\;a_0\;a_1) = |f(\text{pre})|+a_0N+a_1N^2$$
+\begin{lstlisting}
+#define	predicate_on 1
+#define	predicate_on_table 2
+#define	predicate_clear 3
+#define	predicate_hold 4
+#define	predicate_empty 5
+#define total_predicates 5
+\end{lstlisting}
+We note that we have used absolute value for the predicate's corresponding value, this is because both \verb|(on 1 2)| and \verb|(~on 1 2)| have the same hash value which eases in finding if a state contains some proposition which might be negated in \verb|preconditions| and \verb|effects| of actions. Negative predicates do not occur in any state (which is represented using PDDL). This function resembles the base-$N$ number and thus $N$ must be greater than maximum $f$ value (here, 5) and maximum block number($\text{max}a_i$), thus $N=1+\text{max}(\text{total\_blocks},\text{total\_predicates})$. We can then retrieve back the arguments in this way (\verb|div| is integer division):
+$$|f(\text{pre})|=F \;\text{mod}\;N$$
+$$a_0 = (F\;\text{div}\;N)\;\text{mod}\;N$$
+$$a_1 = F\;\text{div}\;N^2$$
+\begin{lstlisting}
+typedef int proposition;
 
-\subsection{Working}
-Now we can encode each constraint in this way:
-$$\text{grid}(i,j)=k\longrightarrow X_{81i+9j+k}$$
-The code encodes these from the input files and then decodes back the $X_i$'s that are true and fills the grid based on these and then gets a solution.
+#define N (max(total_blocks, total_predicates) + 1)
+
+#define type(x) (x % N)
+
+#define var1(x) ((x / N) % N)
+#define var2(x) (x / (N * N))
+\end{lstlisting}
+
+\subsubsection{State}
+Now each state can be represented as a \verb|set| of \verb|proposition|s or equivalently integer hash values of them. For checking if a state is a goal state we can check for each \verb|proposition| from goal state that whether it exitsts in the current state or not and becasue we have used \verb|set| to represent states, thus this process becomes $O(\log n)$ (instead of $O(1)$, C++ uses Red-Black Tree).
+\begin{lstlisting}
+typedef set<proposition> state;
+\end{lstlisting}
+\subsubsection{Variable Action and Action}
+We can represent the action which contains variables in form of \verb|variable_action| which has the following structure:
+\begin{lstlisting}
+enum action_type {
+	action_pick,
+	action_unstack,
+	action_release,
+	action_stack
+};
+
+struct variable_action {
+		action_type type;
+		string name;
+		vector<char> args;
+		vector<condition> preconditions;
+		vector<condition> effects;
+};
+\end{lstlisting}
+The type and name are obvious, the args are actually variables starting from `\verb|a|' that represents the variables required by the \verb|preconditions| and \verb|effects| of the action, both of which cotain predicates in form of \verb|condition|:
+
+\begin{lstlisting}
+typedef int predicate;
+
+struct condition {
+		predicate _predicate;
+		vector<char> args;
+
+		inline proposition value(int var1, int var2, int total_blocks) {
+			int k = N;
+			int v = abs(_predicate);
+			for (char c : args) {
+				v += k * ((c == 'a') ? var1 : var2);
+				k *= N;
+			}
+			return v;
+		}
+};
+\end{lstlisting}
+Here \verb|predicate| is the corresponding value assigned to that predicate symbol above. \verb|args| is similar to as above and \verb|value| function returns the $f$ value we previously discussed.
+
+An action that has been instantiated can be assigned values to the arguments and thus becomes:
+\begin{lstlisting}
+struct action {
+		string name;
+		vector<int> args;
+		bool operator<(const action& that) const {
+			if (name.compare(that.name) >= 0) return false;
+			if (args.size() >= that.args.size()) return false;
+			for (int i = 0; i < args.size(); i++)
+				if (args[i] >= that.args[i]) return false;
+			return true;
+		}
+};
+\end{lstlisting}
+We have also defined \verb|operator<| for comparison such that it can stored in a \verb|set| (C++ uses Red-Black Tree for representation of sets internally.)
+
+\section{Forward Search using BFS}
 \end{document}
