@@ -1,10 +1,10 @@
+#include <action.hpp>
+#include <planner.hpp>
+#include <problem.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
 
-#include "action.hpp"
-#include "planner.hpp"
-#include "problem.hpp"
 #include "read_write.cpp"
 
 using namespace std;

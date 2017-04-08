@@ -1,8 +1,8 @@
 #ifndef FORWARD_SEARCH_HPP
 #define FORWARD_SEARCH_HPP
 
-#include "action.hpp"
-#include "problem.hpp"
+#include <action.hpp>
+#include <problem.hpp>
 
 struct forward_search_node {
 		state curr_state;

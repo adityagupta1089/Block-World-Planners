@@ -1,14 +1,12 @@
 #ifndef ACTION_CPP
 #define ACTION_CPP
 
-#include "action.hpp"
-
+#include <action.hpp>
+#include <planner.hpp>
+#include <problem.hpp>
 #include <map>
 #include <set>
 #include <utility>
-
-#include "planner.hpp"
-#include "problem.hpp"
 
 bool action_applicable(variable_action& _variable_action, int var1, int var2, int total_blocks, state& _state, action& _action) {
 	for (condition _condition : _variable_action.preconditions) {

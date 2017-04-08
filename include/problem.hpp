@@ -1,10 +1,9 @@
 #ifndef PROBLEM_HPP
 #define PROBLEM_HPP
 
+#include <predicate.hpp>
 #include <map>
 #include <set>
-
-#include "predicate.hpp"
 
 using namespace std;
 

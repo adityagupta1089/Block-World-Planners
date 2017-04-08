@@ -1,16 +1,15 @@
 #ifndef GOAL_STACK_CPP
 #define GOAL_STACK_CPP
 
+#include <action.hpp>
+#include <planner.hpp>
+#include <predicate.hpp>
+#include <problem.hpp>
 #include <map>
 #include <set>
 #include <stack>
 #include <utility>
 #include <vector>
-
-#include "action.hpp"
-#include "planner.hpp"
-#include "predicate.hpp"
-#include "problem.hpp"
 
 #define CONJUNCT_GOAL -1
 #define ACTION -2

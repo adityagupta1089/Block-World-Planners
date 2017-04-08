@@ -1,10 +1,9 @@
 #ifndef ACTION_HPP
 #define ACTION_HPP
 
+#include <predicate.hpp>
 #include <string>
 #include <vector>
-
-#include "predicate.hpp"
 
 using namespace std;
 

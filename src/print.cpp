@@ -1,13 +1,12 @@
 #ifndef PRINT_CPP
 #define PRINT_CPP
 
+#include <action.hpp>
+#include <predicate.hpp>
+#include <problem.hpp>
 #include <iostream>
 #include <map>
 #include <string>
-
-#include "action.hpp"
-#include "predicate.hpp"
-#include "problem.hpp"
 
 using namespace std;
 

@@ -1,5 +1,5 @@
 IDIR =include
-CC=g++
+CC=clang++
 CFLAGS=-I$(IDIR) -Ofast -std=c++11
 
 ODIR=bin

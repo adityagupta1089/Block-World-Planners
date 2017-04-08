@@ -11,7 +11,6 @@
 #include <utility>
 #include <vector>
 
-#include "heuristics.cpp"
 
 using namespace std;
 

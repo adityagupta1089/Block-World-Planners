@@ -21,10 +21,16 @@ typedef int predicate;
 
 #define N (max(total_blocks, total_predicates) + 1)
 
-#define type(x) (x % N)
+inline int type(proposition x) {
+	return (x % N);
+}
 
-#define var1(x) ((x / N) % N)
-#define var2(x) (x / (N * N))
+inline int var1(proposition x) {
+	return ((x / N) % N);
+}
+inline int var2(proposition x) {
+	return (x / (N * N));
+}
 
 map<string, predicate> propositions =
 	{

@@ -1,18 +1,15 @@
 #ifndef PROBLEM_CPP
 #define PROBLEM_CPP
 
-#include "problem.hpp"
-
+#include <action.hpp>
+#include <planner.hpp>
+#include <problem.hpp>
 #include <cstdlib>
 #include <iostream>
 #include <regex>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include "action.hpp"
-#include "planner.hpp"
-#include "predicate.hpp"
 
 using namespace std;
 

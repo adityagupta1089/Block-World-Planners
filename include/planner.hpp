@@ -1,18 +1,23 @@
 #ifndef PLANNER_HPP
 #define PLANNER_HPP
 
+#include <action.hpp>
+#include <predicate.hpp>
+#include <problem.hpp>
 #include <string>
 #include <vector>
 
-#include "action.hpp"
-#include "predicate.hpp"
-#include "problem.hpp"
-
 struct forward_search_node;
 
-#define contains(_map, _val) (_map.find(_val) != _map.end())
-
 using namespace std;
+
+template<typename K, typename V> inline bool contains(map<K, V> _map, V _val) {
+	return _map.find(_val) != _map.end();
+}
+
+template<typename V> inline bool contains(set<V> _set, V _val) {
+	return _set.find(_val) != _set.end();
+}
 
 // top level functions
 void read_input(char*, problem&);
