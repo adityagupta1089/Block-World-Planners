@@ -34,102 +34,10 @@ struct action {
 		}
 };
 
-variable_action variable_action_pick =
-	{ action_pick, "pick",
-		{ 'a' },
-		{
-			{ predicate_on_table,
-				{ 'a' } },
-			{ predicate_clear,
-				{ 'a' } },
-			{ predicate_empty, {} }
-
-		},
-		{
-			{ predicate_hold,
-				{ 'a' } },
-			{ -predicate_clear,
-				{ 'a' } },
-			{ -predicate_empty, {} },
-			{ -predicate_on_table,
-				{ 'a' } }
-
-		}
-
-	};
-
-variable_action variable_action_unstack =
-	{ action_unstack, "unstack",
-		{ 'a', 'b' },
-		{
-			{ predicate_on,
-				{ 'a', 'b' } },
-			{ predicate_clear,
-				{ 'a' } },
-			{ predicate_empty, {} } },
-
-		{
-			{ predicate_hold,
-				{ 'a' } },
-			{ predicate_clear,
-				{ 'b' } },
-			{ -predicate_on,
-				{ 'a', 'b' } },
-			{ -predicate_empty, {} },
-			{ -predicate_clear,
-				{ 'a' } }
-
-		}
-
-	};
-
-variable_action variable_action_release =
-	{ action_release, "release",
-		{ 'a' },
-		{
-			{ predicate_hold,
-				{ 'a' } }
-
-		},
-		{
-			{ predicate_on_table,
-				{ 'a' } },
-			{ predicate_clear,
-				{ 'a' } },
-			{ predicate_empty, {} },
-			{ -predicate_hold,
-				{ 'a' } }
-
-		},
-
-	};
-
-variable_action variable_action_stack =
-	{ action_stack, "stack",
-		{ 'a', 'b' },
-		{
-			{ predicate_clear,
-				{ 'b' } },
-			{ predicate_hold,
-				{ 'a' } }
-
-		},
-		{
-			{ predicate_on,
-				{ 'a', 'b' } },
-			{ predicate_clear,
-				{ 'a' } },
-			{ predicate_empty, {} },
-			{ -predicate_hold,
-				{ 'a' } },
-			{ -predicate_clear,
-				{ 'b' } }
-
-		}
-
-	};
-
-vector<variable_action> variable_actions =
-	{ variable_action_pick, variable_action_unstack, variable_action_release, variable_action_stack };
+extern variable_action variable_action_pick;
+extern variable_action variable_action_unstack;
+extern variable_action variable_action_release;
+extern variable_action variable_action_stack;
+extern vector<variable_action> variable_actions;
 
 #endif /*ACTION_HPP*/

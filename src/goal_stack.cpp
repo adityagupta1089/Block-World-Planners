@@ -14,9 +14,11 @@
 #define CONJUNCT_GOAL -1
 #define ACTION -2
 
+using namespace std;
+
 typedef vector<proposition> conjunct_goal;
 
-void find_actions_goal_stack(int total_blocks, state curr_state, state& goal_state, vector<action>& actions) {
+void find_actions_goal_stack(state curr_state, state& goal_state, vector<action>& actions) {
 	stack<proposition> goal_stack;
 	stack<conjunct_goal> conjunct_goal_stack;
 	stack<pair<action, variable_action>> action_stack;
@@ -53,8 +55,7 @@ void find_actions_goal_stack(int total_blocks, state curr_state, state& goal_sta
 			pair<action, variable_action> action_top = action_stack.top();
 			action_stack.pop();
 			actions.push_back(action_top.first);
-			curr_state = apply_action(action_top.second, action_top.first.args[0], action_top.first.args[1], total_blocks,
-					curr_state);
+			curr_state = apply_action(action_top.second, action_top.first.args[0], action_top.first.args[1], curr_state);
 			if (is_goal_state(curr_state, goal_state)) {
 				return;
 			}
@@ -62,13 +63,13 @@ void find_actions_goal_stack(int total_blocks, state curr_state, state& goal_sta
 			if (curr_state.find(top) != curr_state.end()) continue;
 			variable_action _variable_action;
 			action _action;
-			get_relevant_action(_variable_action, _action, total_blocks, curr_state, top);
+			get_relevant_action(_variable_action, _action, curr_state, top);
 			vector<proposition> preconditions;
 			action_stack.push(make_pair(_action, _variable_action));
 			goal_stack.push(ACTION);
 			goal_stack.push(CONJUNCT_GOAL);
 			for (condition precondition : _variable_action.preconditions) {
-				proposition _proposition = precondition.value(_action.args[0], _action.args[1], total_blocks);
+				proposition _proposition = precondition.value(_action.args[0], _action.args[1]);
 				preconditions.push_back(_proposition);
 				goal_stack.push(_proposition);
 			}

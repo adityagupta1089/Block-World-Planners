@@ -11,6 +11,8 @@
 
 using namespace std;
 
+int TOTAL_BLOCKS;
+
 void read_input(char* file, problem& _problem) {
 	ifstream in(file);
 	string line;
@@ -18,16 +20,16 @@ void read_input(char* file, problem& _problem) {
 	while (getline(in, line)) {
 		switch (line_num) {
 			case 0:
-				_problem.blocks = atoi(line.c_str());
+				TOTAL_BLOCKS = atoi(line.c_str());
 				break;
 			case 1:
 				_problem.type = planners[line[0]];
 				break;
 			case 3:
-				parse_propositions(_problem.blocks, line, _problem.initial_state);
+				parse_propositions(line, _problem.initial_state);
 				break;
 			case 5:
-				parse_propositions(_problem.blocks, line, _problem.goal_state);
+				parse_propositions(line, _problem.goal_state);
 				break;
 			default:
 				break;

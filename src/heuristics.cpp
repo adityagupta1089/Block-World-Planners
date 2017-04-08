@@ -7,10 +7,10 @@
 
 using namespace std;
 
-int* map_heights(const state& _state, int total_blocks) {
-	int next[total_blocks + 1];
-	int* h = new int[total_blocks + 1];
-	for (int i = 1; i <= total_blocks; i++) {
+int* map_heights(const state& _state) {
+	int next[TOTAL_BLOCKS + 1];
+	int* h = new int[TOTAL_BLOCKS + 1];
+	for (int i = 1; i <= TOTAL_BLOCKS; i++) {
 		next[i] = -1;
 		h[i] = -1;
 	}
@@ -34,10 +34,10 @@ int* map_heights(const state& _state, int total_blocks) {
 	return h;
 }
 
-int heuristic_value(const state& curr_state, int* height_goal, int total_blocks) {
-	int* height_curr = map_heights(curr_state, total_blocks);
+int heuristic_value(const state& curr_state, int* height_goal) {
+	int* height_curr = map_heights(curr_state);
 	int _heuristic_value = 0;
-	for (int i = 1; i <= total_blocks; i++) {
+	for (int i = 1; i <= TOTAL_BLOCKS; i++) {
 		if (height_curr[i] != -1 && height_goal[i] != -1 && height_curr[i] != height_goal[i]) {
 			_heuristic_value += 2;
 		}

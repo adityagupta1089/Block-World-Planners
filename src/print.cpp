@@ -19,18 +19,18 @@ map<int, string> proposition_names =
 		{ 5, "empty" }
 
 	};
-void print_proposition(const proposition& _proposition, int total_blocks) {
+void print_proposition(const proposition& _proposition) {
 	cout << "(" << proposition_names[type(_proposition)];
-	if (_proposition > N) cout << " " << var1(_proposition);
-	if (_proposition > N * N) cout << " " << var2(_proposition);
+	if (_proposition > M) cout << " " << var1(_proposition);
+	if (_proposition > M * M) cout << " " << var2(_proposition);
 	cout << ") [";
 	cout << _proposition;
 	cout << "] ";
 }
 
-void print_state(const state& top, int total_blocks) {
+void print_state(const state& top) {
 	for (const proposition& _proposition : top) {
-		print_proposition(_proposition, total_blocks);
+		print_proposition(_proposition);
 	}
 	cout << "\n";
 }

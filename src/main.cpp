@@ -5,10 +5,7 @@
 #include <cstdlib>
 #include <vector>
 
-#include "read_write.cpp"
-
 using namespace std;
-
 
 //=============================================
 // MAIN

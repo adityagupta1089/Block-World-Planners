@@ -15,16 +15,9 @@ enum planner_type {
 	goal_stack_planner
 };
 
-map<char, planner_type> planners =
-	{
-		{ 'f', forward_bfs_planner },
-		{ 'a', forward_astar_planner },
-		{ 'g', goal_stack_planner }
-
-	};
+extern map<char, planner_type> planners;
 
 struct problem {
-		int blocks;
 		planner_type type;
 		state initial_state;
 		state goal_state;
