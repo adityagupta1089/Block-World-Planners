@@ -15,7 +15,7 @@
 
 using namespace std;
 
-#define contains(_map, _val) (_map.find(_val) != _map.end())
+#define contains(x, y) (x.find(y) != x.end())
 
 //=============================================
 // ENUMS
@@ -228,7 +228,7 @@ variable_action variable_action_stack =
 	};
 
 vector<variable_action> variable_actions =
-	{ variable_action_pick, variable_action_unstack, variable_action_release, variable_action_stack };
+	{ variable_action_release, variable_action_unstack, variable_action_pick, variable_action_stack };
 
 //=============================================
 // PROTOTOTYPES
@@ -701,7 +701,7 @@ void get_relevant_action(variable_action& relevant_variable_action, action& _rel
 }
 
 /*
- * S0: Get most relevant action
+ * S0: Get first relevant action
  * */
 void get_relevant_action_s0(variable_action& relevant_variable_action, action& _relevant_action, state& curr_state,
 		proposition goal) {
@@ -722,7 +722,7 @@ void get_relevant_action_s0(variable_action& relevant_variable_action, action& _
 }
 
 /*
- * S0: Get most relevant action
+ * S1: Get most relevant action
  * */
 void get_relevant_action_s1(variable_action& relevant_variable_action, action& _relevant_action, state& curr_state,
 		proposition goal) {
@@ -752,7 +752,7 @@ void get_relevant_action_s1(variable_action& relevant_variable_action, action& _
 }
 
 /*
- * S1: Get action which is least used and more relevant
+ * S2: Get action which is least used and more relevant
  * */
 map<pair<state, proposition>, action_record> action_records;
 
@@ -800,11 +800,53 @@ void get_relevant_action_s2(variable_action& relevant_variable_action, action& _
 }
 
 /*
- * S2: get relevant action based on hard coded situations
+ * S3: get relevant action based on hard coded situations
  * */
 void get_relevant_action_s3(variable_action& relevant_variable_action, action& _relevant_action, state& curr_state,
 		proposition goal) {
-
+	if (type(goal) == predicate_empty) { //release
+		for (proposition _proposition : curr_state) {
+			// if the block we want to release is what we are holding
+			if (type(_proposition) == predicate_hold) {
+				relevant_variable_action = variable_action_release;
+				instantiate_action(relevant_variable_action, _relevant_action, var1(_proposition), 1);
+				return;
+			}
+		}
+	} else if (type(goal) == predicate_clear) { //unstack
+		for (proposition _proposition : curr_state) {
+			//if the blocks we want to clear has a block on it
+			if (type(_proposition) == predicate_on && var2(_proposition) == var1(goal)) {
+				relevant_variable_action = variable_action_unstack;
+				instantiate_action(relevant_variable_action, _relevant_action, var1(_proposition), var1(goal));
+				return;
+			}
+		}
+	} else if (type(goal) == predicate_hold) { //unstack,pick
+		for (proposition _proposition : curr_state) {
+			//if the block we want to hold is on a block
+			if (type(_proposition) == predicate_on && var1(_proposition) == var1(goal)) {
+				relevant_variable_action = variable_action_unstack;
+				instantiate_action(relevant_variable_action, _relevant_action, var1(_proposition), var2(_proposition));
+				return;
+			}
+			//if the block we want to hold is on table
+			if (type(_proposition) == predicate_on_table && var1(_proposition) == var1(goal)) {
+				relevant_variable_action = variable_action_pick;
+				instantiate_action(relevant_variable_action, _relevant_action, var1(_proposition), 1);
+				return;
+			}
+		}
+	} else if (type(goal) == predicate_on) { //stack
+		//we want the block on another block
+		relevant_variable_action = variable_action_stack;
+		instantiate_action(relevant_variable_action, _relevant_action, var1(goal), var2(goal));
+		return;
+	} else if (type(goal) == predicate_on_table) { //release
+		relevant_variable_action = variable_action_release;
+		instantiate_action(relevant_variable_action, _relevant_action, var1(goal), 1);
+		return;
+	}
 }
 
 /*

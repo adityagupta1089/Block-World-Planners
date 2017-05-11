@@ -1,33 +1,27 @@
-32
-unstack 9 12 
-release 9 
-unstack 12 11 
-stack 12 9 
-unstack 11 10 
-release 11 
+26
 unstack 5 8 
-stack 5 12 
+release 5 
 unstack 8 7 
 release 8 
 unstack 7 6 
 release 7 
-pick 11 
-stack 11 8 
-unstack 5 12 
-stack 5 7 
-unstack 10 3 
-stack 10 12 
-unstack 11 8 
-stack 11 3 
 pick 6 
 stack 6 8 
-unstack 10 12 
+unstack 9 12 
+stack 9 6 
+unstack 12 11 
+stack 12 5 
+unstack 11 10 
+stack 11 12 
+unstack 10 3 
 release 10 
-unstack 12 9 
-release 12 
-pick 9 
+unstack 11 12 
+stack 11 3 
+unstack 9 6 
 stack 9 11 
-pick 12 
+unstack 12 5 
 stack 12 9 
 pick 10 
 stack 10 12 
+pick 5 
+stack 5 7 
