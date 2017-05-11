@@ -1,11 +1,11 @@
 # README
 
-# Compiling
+## Compiling
 ```bash
 make all
 ```
 
-# Running
+## Running
 ```bash
 ./main.o <input-file> <output-file> <optinal heuristic/relevant action selector id>
 ```
